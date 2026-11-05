@@ -5,6 +5,15 @@ import requests
 from builda_client.exceptions import ClientException, ServerException, UnauthorizedException
 
 class BaseClient(ABC):
+    def __init__(self, timeout: float | None = 3600):
+        """Constructor.
+
+        Args:
+            timeout (float | None): Timeout in seconds for every request made
+                by this client. Set to None to wait indefinitely. Defaults to 3600.
+        """
+        self.timeout = timeout
+
     def handle_exception(self, err: requests.exceptions.HTTPError):
             if err.response.status_code == 403:
                 raise UnauthorizedException(
