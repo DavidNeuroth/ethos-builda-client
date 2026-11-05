@@ -187,7 +187,8 @@ class BuildaDevClient(BaseClient):
         password: str,
         phase: Phase = Phase.DEVELOPMENT,
         proxy: bool = False,
-        version: str = "v0"
+        version: str = "v0",
+        timeout: Optional[float] = 3600,
     ):
         """Constructor.
 
@@ -199,8 +200,10 @@ class BuildaDevClient(BaseClient):
             phase (Phase, optional): The 'phase' the client is used in, i.e. which
                 database to access. Defaults to Phase.DEVELOPMENT.
             version (str, optional): The API version. Defaults to v0
+            timeout (float | None, optional): Timeout in seconds for every request
+                made by this client. Set to None to wait indefinitely. Defaults to 3600.
         """
-        super().__init__()
+        super().__init__(timeout)
 
         self.username = username
         self.password = password
@@ -295,7 +298,7 @@ class BuildaDevClient(BaseClient):
             url += f"&geom={geom}"
 
         try:
-            response: requests.Response = requests.get(url, headers=self.__construct_authorization_header())
+            response: requests.Response = requests.get(url, timeout=self.timeout, headers=self.__construct_authorization_header())
             logging.debug("ApiClient: received response. Checking for errors.")
             response.raise_for_status()
         except requests.HTTPError as e:
@@ -368,7 +371,7 @@ class BuildaDevClient(BaseClient):
             url += f"&id__in={','.join(ids)}"
 
         try:
-            response: requests.Response = requests.get(url, timeout=3600, headers=self.__construct_authorization_header())
+            response: requests.Response = requests.get(url, timeout=self.timeout, headers=self.__construct_authorization_header())
             logging.debug("ApiClient: received response. Checking for errors.")
             response.raise_for_status()
         except requests.HTTPError as err:
@@ -456,7 +459,7 @@ class BuildaDevClient(BaseClient):
         try:
             response: requests.Response = requests.get(
                 url, 
-                timeout=3600, 
+                timeout=self.timeout, 
                 headers=self.__construct_authorization_header()
             )
             logging.debug("ApiClient: received response. Checking for errors.")
@@ -550,7 +553,7 @@ class BuildaDevClient(BaseClient):
 
         url: str = f"""{self.base_url}{self.RESIDENTIAL_BUILDINGS_WITH_SOURCES_URL}?street={street}&house_number={housenumber}&postcode={postcode}&city={city}&{nuts_query_param}={nuts_code}&type={building_type}"""
         try:
-            response: requests.Response = requests.get(url, timeout=3600, headers=self.__construct_authorization_header())
+            response: requests.Response = requests.get(url, timeout=self.timeout, headers=self.__construct_authorization_header())
             logging.debug("ApiClient: received response. Checking for errors.")
             response.raise_for_status()
         except requests.exceptions.HTTPError as err:
@@ -762,7 +765,7 @@ class BuildaDevClient(BaseClient):
         try:
             response: requests.Response = requests.get(
                 url, 
-                timeout=3600,
+                timeout=self.timeout,
                 headers=self.__construct_authorization_header())
             logging.debug("ApiClient: received response. Checking for errors.")
             response.raise_for_status()
@@ -828,7 +831,7 @@ class BuildaDevClient(BaseClient):
             url += f"&geom={geom}"
 
         try:
-            response: requests.Response = requests.get(url, headers=self.__construct_authorization_header())
+            response: requests.Response = requests.get(url, timeout=self.timeout, headers=self.__construct_authorization_header())
             logging.debug("ApiClient: received response. Checking for errors.")
             response.raise_for_status()
         except requests.HTTPError as err:
@@ -858,7 +861,7 @@ class BuildaDevClient(BaseClient):
             url += f"&geom={geom}"
             
         try:
-            response: requests.Response = requests.get(url, headers=self.__construct_authorization_header())
+            response: requests.Response = requests.get(url, timeout=self.timeout, headers=self.__construct_authorization_header())
             logging.debug("ApiClient: received response. Checking for errors.")
             response.raise_for_status()
         except requests.HTTPError as e:
@@ -920,7 +923,7 @@ class BuildaDevClient(BaseClient):
 
         try:
             response: requests.Response = requests.get(
-                url, headers=self.__construct_authorization_header()
+                url, timeout=self.timeout, headers=self.__construct_authorization_header()
             )
             response.raise_for_status()
         except requests.HTTPError as e:
@@ -955,6 +958,7 @@ class BuildaDevClient(BaseClient):
         try:
             response: requests.Response = requests.post(
                 url,
+                timeout=self.timeout,
                 data=parcel_infos_json,
                 headers=self.__construct_authorization_header(),
             )
@@ -978,7 +982,7 @@ class BuildaDevClient(BaseClient):
         parcels_json = json.dumps(parcels, cls=EnhancedJSONEncoder)
         try:
             response: requests.Response = requests.post(
-                url, data=parcels_json, headers=self.__construct_authorization_header()
+                url, timeout=self.timeout, data=parcels_json, headers=self.__construct_authorization_header()
             )
             response.raise_for_status()
         except requests.exceptions.HTTPError as err:
@@ -994,7 +998,7 @@ class BuildaDevClient(BaseClient):
         building_json = json.dumps(building_data)
         try:
             response: requests.Response = requests.put(
-                url, data=building_json, headers=self.__construct_authorization_header()
+                url, timeout=self.timeout, data=building_json, headers=self.__construct_authorization_header()
             )
             response.raise_for_status()
         except requests.exceptions.HTTPError as err:
@@ -1029,7 +1033,7 @@ class BuildaDevClient(BaseClient):
         url: str = f"""{self.base_url}{self.VIEW_REFRESH_URL}/{view_name}"""
         try:
             response: requests.Response = requests.post(
-                url, headers=self.__construct_authorization_header(json=False)
+                url, timeout=self.timeout, headers=self.__construct_authorization_header(json=False)
             )
             response.raise_for_status()
         except requests.HTTPError as err:
@@ -1056,7 +1060,7 @@ class BuildaDevClient(BaseClient):
         url: str = f"""{self.base_url}{self.VIEW_REFRESH_URL}/{view_name}"""
         try:
             response: requests.Response = requests.post(
-                url, headers=self.__construct_authorization_header(json=False)
+                url, timeout=self.timeout, headers=self.__construct_authorization_header(json=False)
             )
             response.raise_for_status()
         except requests.HTTPError as err:
@@ -1103,7 +1107,7 @@ class BuildaDevClient(BaseClient):
 
         try:
             response: requests.Response = requests.get(
-                url, headers=self.__construct_authorization_header()
+                url, timeout=self.timeout, headers=self.__construct_authorization_header()
             )
             response.raise_for_status()
         except requests.HTTPError as e:
@@ -1158,6 +1162,7 @@ class BuildaDevClient(BaseClient):
         try:
             response: requests.Response = requests.post(
                 url,
+                timeout=self.timeout,
                 data=buildings_json,
                 headers=self.__construct_authorization_header(),
             )
@@ -1215,7 +1220,7 @@ class BuildaDevClient(BaseClient):
 
         try:
             response: requests.Response = requests.get(
-                url, headers=self.__construct_authorization_header()
+                url, timeout=self.timeout, headers=self.__construct_authorization_header()
             )
             response.raise_for_status()
         except requests.HTTPError as e:
@@ -1276,6 +1281,7 @@ class BuildaDevClient(BaseClient):
         try:
             response: requests.Response = requests.post(
                 url,
+                timeout=self.timeout,
                 data=nuts_regions_json,
                 headers=self.__construct_authorization_header(),
             )
@@ -1309,6 +1315,7 @@ class BuildaDevClient(BaseClient):
         try:
             response: requests.Response = requests.post(
                 url,
+                timeout=self.timeout,
                 data=addresses_json,
                 headers=self.__construct_authorization_header(),
             )
@@ -1344,6 +1351,7 @@ class BuildaDevClient(BaseClient):
         try:
             response: requests.Response = requests.post(
                 url,
+                timeout=self.timeout,
                 data=type_infos_json,
                 headers=self.__construct_authorization_header(),
             )
@@ -1379,6 +1387,7 @@ class BuildaDevClient(BaseClient):
         try:
             response: requests.Response = requests.post(
                 url,
+                timeout=self.timeout,
                 data=use_infos_json,
                 headers=self.__construct_authorization_header(),
             )
@@ -1412,6 +1421,7 @@ class BuildaDevClient(BaseClient):
         try:
             response: requests.Response = requests.post(
                 url,
+                timeout=self.timeout,
                 data=height_infos_json,
                 headers=self.__construct_authorization_header(),
             )
@@ -1445,6 +1455,7 @@ class BuildaDevClient(BaseClient):
         try:
             response: requests.Response = requests.post(
                 url,
+                timeout=self.timeout,
                 data=infos_json,
                 headers=self.__construct_authorization_header(),
             )
@@ -1479,6 +1490,7 @@ class BuildaDevClient(BaseClient):
         try:
             response: requests.Response = requests.post(
                 url,
+                timeout=self.timeout,
                 data=infos_json,
                 headers=self.__construct_authorization_header(),
             )
@@ -1513,6 +1525,7 @@ class BuildaDevClient(BaseClient):
         try:
             response: requests.Response = requests.post(
                 url,
+                timeout=self.timeout,
                 data=floor_areas_infos_json,
                 headers=self.__construct_authorization_header(),
             )
@@ -1547,6 +1560,7 @@ class BuildaDevClient(BaseClient):
         try:
             response: requests.Response = requests.post(
                 url,
+                timeout=self.timeout,
                 data=housing_unit_count_infos_json,
                 headers=self.__construct_authorization_header(),
             )
@@ -1580,6 +1594,7 @@ class BuildaDevClient(BaseClient):
         try:
             response: requests.Response = requests.post(
                 url,
+                timeout=self.timeout,
                 data=households_json,
                 headers=self.__construct_authorization_header(),
             )
@@ -1613,6 +1628,7 @@ class BuildaDevClient(BaseClient):
         try:
             response: requests.Response = requests.post(
                 url,
+                timeout=self.timeout,
                 data=persons_json,
                 headers=self.__construct_authorization_header(),
             )
@@ -1650,6 +1666,7 @@ class BuildaDevClient(BaseClient):
         try:
             response: requests.Response = requests.post(
                 url,
+                timeout=self.timeout,
                 json=mobility_preference,
                 headers=self.__construct_authorization_header(),
             )
@@ -1690,6 +1707,7 @@ class BuildaDevClient(BaseClient):
         try:
             response: requests.Response = requests.post(
                 url,
+                timeout=self.timeout,
                 data=energy_system_infos_json,
                 headers=self.__construct_authorization_header(),
             )
@@ -1729,6 +1747,7 @@ class BuildaDevClient(BaseClient):
         try:
             response: requests.Response = requests.post(
                 url,
+                timeout=self.timeout,
                 data=energy_consumption_infos_json,
                 headers=self.__construct_authorization_header(),
             )
@@ -1762,6 +1781,7 @@ class BuildaDevClient(BaseClient):
         try:
             response: requests.Response = requests.post(
                 url,
+                timeout=self.timeout,
                 data=heat_demand_infos_json,
                 headers=self.__construct_authorization_header(),
             )
@@ -1795,6 +1815,7 @@ class BuildaDevClient(BaseClient):
         try:
             response: requests.Response = requests.post(
                 url,
+                timeout=self.timeout,
                 data=heating_load_infos_json,
                 headers=self.__construct_authorization_header(),
             )
@@ -1827,6 +1848,7 @@ class BuildaDevClient(BaseClient):
         try:
             response: requests.Response = requests.post(
                 url,
+                timeout=self.timeout,
                 data=pv_potential_infos_json,
                 headers=self.__construct_authorization_header(),
             )
@@ -1861,6 +1883,7 @@ class BuildaDevClient(BaseClient):
         try:
             response: requests.Response = requests.post(
                 url,
+                timeout=self.timeout,
                 data=construction_year_json,
                 headers=self.__construct_authorization_header(),
             )
@@ -1891,6 +1914,7 @@ class BuildaDevClient(BaseClient):
         try:
             response: requests.Response = requests.post(
                 url,
+                timeout=self.timeout,
                 data=tabula_type_json,
                 headers=self.__construct_authorization_header(),
             )
@@ -1923,6 +1947,7 @@ class BuildaDevClient(BaseClient):
         try:
             response: requests.Response = requests.post(
                 url,
+                timeout=self.timeout,
                 data=size_class_json,
                 headers=self.__construct_authorization_header(),
             )
@@ -1957,6 +1982,7 @@ class BuildaDevClient(BaseClient):
         try:
             response: requests.Response = requests.post(
                 url,
+                timeout=self.timeout,
                 data=additional_infos_json,
                 headers=self.__construct_authorization_header(),
             )
@@ -1977,6 +2003,7 @@ class BuildaDevClient(BaseClient):
         try:
             response: requests.Response = requests.post(
                 url,
+                timeout=self.timeout,
                 data=json.dumps(
                     {"function_name": function_name, "measured_time": measured_time}
                 ),
@@ -1990,7 +2017,7 @@ class BuildaDevClient(BaseClient):
         logging.debug("ApiClient: get_nuts_region")
         url: str = f"""{self.base_url}{self.NUTS_CODES_URL}/{nuts_code}"""
         try:
-            response: requests.Response = requests.get(url, headers=self.__construct_authorization_header())
+            response: requests.Response = requests.get(url, timeout=self.timeout, headers=self.__construct_authorization_header())
             response.raise_for_status()
         except requests.HTTPError as e:
             if e.response.status_code == 403:
@@ -2018,7 +2045,7 @@ class BuildaDevClient(BaseClient):
             f"""{self.base_url}{self.NUTS_CODES_URL}?parent={parent_region_code}"""
         )
         try:
-            response: requests.Response = requests.get(url, headers=self.__construct_authorization_header())
+            response: requests.Response = requests.get(url, timeout=self.timeout, headers=self.__construct_authorization_header())
             response.raise_for_status()
         except requests.HTTPError as e:
             if e.response.status_code == 403:
@@ -2057,6 +2084,7 @@ class BuildaDevClient(BaseClient):
         try:
             response: requests.Response = requests.post(
                 url,
+                timeout=self.timeout,
                 data=refurbishment_state_infos_json,
                 headers=self.__construct_authorization_header(),
             )
@@ -2087,6 +2115,7 @@ class BuildaDevClient(BaseClient):
         try:
             response: requests.Response = requests.post(
                 url,
+                timeout=self.timeout,
                 data=roof_characteristics_json,
                 headers=self.__construct_authorization_header(),
             )
@@ -2121,6 +2150,7 @@ class BuildaDevClient(BaseClient):
         try:
             response: requests.Response = requests.post(
                 url,
+                timeout=self.timeout,
                 data=metadata_json,
                 headers=self.__construct_authorization_header(),
             )
@@ -2155,6 +2185,7 @@ class BuildaDevClient(BaseClient):
         try:
             response: requests.Response = requests.post(
                 url,
+                timeout=self.timeout,
                 data=metadata_json,
                 headers=self.__construct_authorization_header(),
             )
@@ -2186,6 +2217,7 @@ class BuildaDevClient(BaseClient):
         try:
             response: requests.Response = requests.post(
                 url,
+                timeout=self.timeout,
                 data={"query": query},
                 headers=self.__construct_authorization_header(json=False),
             )
@@ -2252,7 +2284,7 @@ class BuildaDevClient(BaseClient):
 
         url: str = f"""{self.base_url}{statistics_url}{query_params}"""
         try:
-            response: requests.Response = requests.get(url, timeout=3600, headers=self.__construct_authorization_header())
+            response: requests.Response = requests.get(url, timeout=self.timeout, headers=self.__construct_authorization_header())
             response.raise_for_status()
         except requests.exceptions.HTTPError as err:
             self.handle_exception(err)
@@ -2331,7 +2363,7 @@ class BuildaDevClient(BaseClient):
 
         url: str = f"""{self.base_url}{statistics_url}{query_params}"""
         try:
-            response: requests.Response = requests.get(url, timeout=3600, headers=self.__construct_authorization_header())
+            response: requests.Response = requests.get(url, timeout=self.timeout, headers=self.__construct_authorization_header())
             response.raise_for_status()
         except requests.exceptions.HTTPError as err:
             self.handle_exception(err)
@@ -2388,7 +2420,7 @@ class BuildaDevClient(BaseClient):
 
         url: str = f"""{self.base_url}{self.PV_GENERATION_POTENTIAL_STATISTICS_URL}{query_params}"""
         try:
-            response: requests.Response = requests.get(url, timeout=3600, headers=self.__construct_authorization_header())
+            response: requests.Response = requests.get(url, timeout=self.timeout, headers=self.__construct_authorization_header())
             response.raise_for_status()
         except requests.exceptions.HTTPError as err:
             self.handle_exception(err)
@@ -2461,7 +2493,7 @@ def get_building_type_statistics(
 
         url: str = f"""{self.base_url}{statistics_url}{query_params}"""
         try:
-            response: requests.Response = requests.get(url, timeout=3600, headers=self.__construct_authorization_header())
+            response: requests.Response = requests.get(url, timeout=self.timeout, headers=self.__construct_authorization_header())
             response.raise_for_status()
         except requests.exceptions.HTTPError as err:
             self.handle_exception(err)
@@ -2529,7 +2561,7 @@ def get_non_residential_building_use_statistics(
 
         url: str = f"""{self.base_url}{statistics_url}{query_params}"""
         try:
-            response: requests.Response = requests.get(url, timeout=3600, headers=self.__construct_authorization_header())
+            response: requests.Response = requests.get(url, timeout=self.timeout, headers=self.__construct_authorization_header())
             response.raise_for_status()
         except requests.exceptions.HTTPError as err:
             self.handle_exception(err)
@@ -2596,7 +2628,7 @@ def get_footprint_area_statistics(
 
         url: str = f"""{self.base_url}{statistics_url}{query_params}"""
         try:
-            response: requests.Response = requests.get(url, timeout=3600, headers=self.__construct_authorization_header())
+            response: requests.Response = requests.get(url, timeout=self.timeout, headers=self.__construct_authorization_header())
             response.raise_for_status()
         except requests.exceptions.HTTPError as err:
             self.handle_exception(err)
@@ -2684,7 +2716,7 @@ def get_height_statistics(
 
         url: str = f"""{self.base_url}{statistics_url}{query_params}"""
         try:
-            response: requests.Response = requests.get(url, timeout=3600, headers=self.__construct_authorization_header())
+            response: requests.Response = requests.get(url, timeout=self.timeout, headers=self.__construct_authorization_header())
             response.raise_for_status()
         except requests.exceptions.HTTPError as err:
             self.handle_exception(err)
@@ -2762,7 +2794,7 @@ def get_residential_heat_demand_statistics(
 
         url: str = f"""{self.base_url}{statistics_url}{query_params}"""
         try:
-            response: requests.Response = requests.get(url, timeout=3600, headers=self.__construct_authorization_header())
+            response: requests.Response = requests.get(url, timeout=self.timeout, headers=self.__construct_authorization_header())
             response.raise_for_status()
         except requests.exceptions.HTTPError as err:
             self.handle_exception(err)

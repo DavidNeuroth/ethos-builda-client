@@ -62,11 +62,17 @@ class BuildaClient(BaseClient):
 
     def __init__(
         self,
+        timeout: Optional[float] = 3600,
     ):
         """This is the API client for the building database ETHOS.BUILDA by
         Forschungszentrum Jülich - Jülich Systems Analysis (IEK-3) available
         at https://ethos-builda.fz-juelich.de.
+
+        Args:
+            timeout (float | None, optional): Timeout in seconds for every request
+                made by this client. Set to None to wait indefinitely. Defaults to 3600.
         """
+        super().__init__(timeout)
         self.config = load_config()
         self.BASE_URL = self.config["production"]["api_address"] + self.config["base_url"]
         logging.basicConfig(level=logging.WARN)
@@ -126,7 +132,7 @@ class BuildaClient(BaseClient):
 
         url: str = f"""{self.BASE_URL}{self.BUILDINGS_URL}?street={street}&house_number={housenumber}&postcode={postcode}&city={city}&{nuts_query_param}={nuts_code}&type={building_type}&type__isnull={type_is_null}"""
         try:
-            response: requests.Response = requests.get(url, timeout=3600)
+            response: requests.Response = requests.get(url, timeout=self.timeout)
             logging.debug("ApiClient: received response. Checking for errors.")
             response.raise_for_status()
         except requests.exceptions.HTTPError as err:
@@ -260,7 +266,7 @@ class BuildaClient(BaseClient):
 
         url: str = f"""{self.BASE_URL}{self.RESIDENTIAL_BUILDINGS_URL}?street={street}&house_number={housenumber}&postcode={postcode}&city={city}&{nuts_query_param}={nuts_code}&type={building_type}"""
         try:
-            response: requests.Response = requests.get(url, timeout=3600)
+            response: requests.Response = requests.get(url, timeout=self.timeout)
             logging.debug("ApiClient: received response. Checking for errors.")
             response.raise_for_status()
         except requests.exceptions.HTTPError as err:
@@ -435,7 +441,7 @@ class BuildaClient(BaseClient):
 
         url: str = f"""{self.BASE_URL}{self.NON_RESIDENTIAL_BUILDINGS_URL}?street={street}&house_number={housenumber}&postcode={postcode}&city={city}&{nuts_query_param}={nuts_code}&type={building_type}&exclude_auxiliary={exclude_auxiliary}"""
         try:
-            response: requests.Response = requests.get(url, timeout=3600)
+            response: requests.Response = requests.get(url, timeout=self.timeout)
             logging.debug("ApiClient: received response. Checking for errors.")
             response.raise_for_status()
         except requests.exceptions.HTTPError as err:
@@ -559,7 +565,7 @@ class BuildaClient(BaseClient):
 
         url: str = f"""{self.BASE_URL}{statistics_url}{query_params}"""
         try:
-            response: requests.Response = requests.get(url, timeout=3600)
+            response: requests.Response = requests.get(url, timeout=self.timeout)
             response.raise_for_status()
         except requests.exceptions.HTTPError as err:
             self.handle_exception(err)
@@ -616,7 +622,7 @@ class BuildaClient(BaseClient):
 
         url: str = f"""{self.BASE_URL}{statistics_url}{query_params}"""
         try:
-            response: requests.Response = requests.get(url, timeout=3600)
+            response: requests.Response = requests.get(url, timeout=self.timeout)
             response.raise_for_status()
         except requests.exceptions.HTTPError as err:
             self.handle_exception(err)
@@ -671,7 +677,7 @@ class BuildaClient(BaseClient):
 
         url: str = f"""{self.BASE_URL}{self.RESIDENTIAL_SIZE_CLASS_STATISTICS_URL}{query_params}"""
         try:
-            response: requests.Response = requests.get(url, timeout=3600)
+            response: requests.Response = requests.get(url, timeout=self.timeout)
             response.raise_for_status()
         except requests.exceptions.HTTPError as err:
             self.handle_exception(err)
@@ -729,7 +735,7 @@ class BuildaClient(BaseClient):
             f"""{self.BASE_URL}{self.CONSTRUCTION_YEAR_STATISTICS_URL}{query_params}"""
         )
         try:
-            response: requests.Response = requests.get(url, timeout=3600)
+            response: requests.Response = requests.get(url, timeout=self.timeout)
             response.raise_for_status()
         except requests.exceptions.HTTPError as err:
             self.handle_exception(err)
@@ -783,7 +789,7 @@ class BuildaClient(BaseClient):
 
         url: str = f"""{self.BASE_URL}{statistics_url}{query_params}"""
         try:
-            response: requests.Response = requests.get(url, timeout=3600)
+            response: requests.Response = requests.get(url, timeout=self.timeout)
             response.raise_for_status()
         except requests.exceptions.HTTPError as err:
             self.handle_exception(err)
@@ -860,7 +866,7 @@ class BuildaClient(BaseClient):
 
         url: str = f"""{self.BASE_URL}{statistics_url}{query_params}"""
         try:
-            response: requests.Response = requests.get(url, timeout=3600)
+            response: requests.Response = requests.get(url, timeout=self.timeout)
             response.raise_for_status()
         except requests.exceptions.HTTPError as err:
             self.handle_exception(err)
@@ -931,7 +937,7 @@ class BuildaClient(BaseClient):
 
         url: str = f"""{self.BASE_URL}{statistics_url}{query_params}"""
         try:
-            response: requests.Response = requests.get(url)
+            response: requests.Response = requests.get(url, timeout=self.timeout)
             response.raise_for_status()
         except requests.exceptions.HTTPError as err:
             self.handle_exception(err)
@@ -993,7 +999,7 @@ class BuildaClient(BaseClient):
 
         url: str = f"""{self.BASE_URL}{statistics_url}{query_params}"""
         try:
-            response: requests.Response = requests.get(url, timeout=3600)
+            response: requests.Response = requests.get(url, timeout=self.timeout)
             response.raise_for_status()
         except requests.exceptions.HTTPError as err:
             self.handle_exception(err)
@@ -1054,7 +1060,7 @@ class BuildaClient(BaseClient):
 
         url: str = f"""{self.BASE_URL}{statistics_url}{query_params}"""
         try:
-            response: requests.Response = requests.get(url, timeout=3600)
+            response: requests.Response = requests.get(url, timeout=self.timeout)
             response.raise_for_status()
         except requests.exceptions.HTTPError as err:
             self.handle_exception(err)
